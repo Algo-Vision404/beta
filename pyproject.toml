@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "beta-system"
+version = "0.1.0"
+description = "Autonomous Multi-Asset Quantitative Intelligence CLI System"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "typer[all]",
+    "rich",
+    "pandas",
+    "numpy",
+    "pandas_ta",
+    "yfinance",
+    "scikit-learn",
+    "hmmlearn",
+    "scipy",
+    "pydantic",
+    "python-dotenv",
+    "loguru",
+    "questionary"
+]
+
+[project.scripts]
+beta = "beta.main:app"

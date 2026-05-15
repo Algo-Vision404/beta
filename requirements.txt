@@ -1,0 +1,13 @@
+typer[all]
+rich
+pandas
+numpy
+pandas_ta
+yfinance
+scikit-learn
+hmmlearn
+scipy
+pydantic
+python-dotenv
+loguru
+questionary
