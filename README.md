@@ -48,9 +48,9 @@ python src/beta/main.py
 
 ## System Architecture
 
-BETA is designed as a modular, event-driven ecosystem where intelligence agents, market engines, and risk authorities interact.
+BETA is a distributed, multi-agent quantitative intelligence operating system. It utilizes an **Adversarial Reasoning** framework where specialized agents compete to validate trade hypotheses before execution authorization.
 
-### High-Level Design
+### High-Level Design (Agentic Topology)
 
 ```mermaid
 graph TD
@@ -78,19 +78,21 @@ graph TD
     J -.-> D
 ```
 
-### Core Components
+### Core Components & Sub-Systems
 
 #### 1. The Adversarial Agent Layer
-- **Orchestrator**: Manages the lifecycle of specialized sub-agents.
-- **Debate Protocol**: A multi-turn reasoning process where agents present conflicting evidence (Bullish vs. Bearish) and a "Risk Monitor" agent adjudicates the final conviction score.
+- **Orchestrator**: Manages the lifecycle and state of specialized neural agents.
+- **Debate Protocol**: A multi-turn adversarial reasoning loop. Agents present conflicting evidence (Bullish vs. Bearish) while a **Risk Monitor** adjudicates the final conviction score based on the "Strength of Signal".
+- **Specialists**: Agents utilize HMM-based (Hidden Markov Model) regime detection and volume-weighted structural analysis.
 
 #### 2. Risk & Authority Engine
-- **Fractional Risk Model**: Automatically calculates position sizing based on account equity and ATR-adjusted stop losses.
-- **Final Authority (Circuit Breaker)**: A hard-coded logic layer that rejects any trade setup exceeding institutional parameters.
+- **Final Authority (Circuit Breaker)**: A hard-coded validation layer that rejects trade setups exceeding institutional parameters (e.g., Max Drawdown, Min R:R, Regime Conflict).
+- **Fractional Risk Engine**: Automatically synthesizes lot sizing based on account equity, ATR-adjusted volatility, and user risk settings.
 
-#### 3. Observability Suite
-- **Cyber-Minimalist CLI**: A high-density information display optimized for low-latency system management.
-- **Neural Stream**: Real-time logging of agent reasoning processes.
+#### 3. Observability & Command Suite
+- **Cyber-Minimalist CLI**: A high-density information display optimized for keyboard-first operation and low-latency feedback.
+- **Neural Stream**: Real-time logging of the agentic "thought process" and debate turns.
+- **Institutional UI**: Professional ASCII-based structural charts and cross-asset volatility matrices.
 
 ---
 
