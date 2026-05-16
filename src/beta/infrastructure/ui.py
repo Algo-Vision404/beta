@@ -130,15 +130,6 @@ class InstitutionalUI:
         return table
 
     @staticmethod
-    def execution_flow(steps: List[Dict[str, str]]) -> Panel:
-        flow = Text()
-        for i, step in enumerate(steps):
-            prefix = " └─ " if i > 0 else " ┌─ "
-            flow.append(f"{prefix}[{step['agent'].upper()}]", style="bold cyan")
-            flow.append(f" ──▶ {step['action']}\n", style="white")
-        return Panel(flow, title="[bold magenta]STRATEGY EXECUTION FLOW[/]", border_style="magenta", expand=False)
-
-    @staticmethod
     def rendered_chart(prices: np.ndarray, title: str = "PRICE STRUCTURE") -> Panel:
         chart = Text()
         max_p = max(prices)
@@ -152,67 +143,57 @@ class InstitutionalUI:
             line.append(f" {i:02d} ", style="dim white")
             if is_last:
                 diff = prices[i] - prices[i-1] if i > 0 else 0
-                if diff > 0:
-                    line.append("█" * bar_len, style="bold green")
-                    line.append(" (o_O)^ CLIMBING!", style="bold green")
-                elif diff < 0:
-                    line.append("█" * bar_len, style="bold red")
-                    line.append(" (X_X)v FALLING!", style="bold red")
-                else:
-                    line.append("█" * bar_len, style="bold cyan")
-                    line.append(" (o_o) IDLE", style="bold cyan")
-                line.append("  ╌╌▶ TRADER", style="bold white")
+                color = "bold green" if diff > 0 else "bold red" if diff < 0 else "bold cyan"
+                status = "ASCENDING" if diff > 0 else "DESCENDING" if diff < 0 else "STABLE"
+                line.append("█" * bar_len, style=color)
+                line.append(f" [{status}]", style=color)
+                line.append("  -- SYSTEM TRACK", style="bold white")
             else:
                 line.append("█" * bar_len, style="dim blue")
-                line.append(" ╎", style="dim blue")
+                line.append(" |", style="dim blue")
             chart.append(line)
             chart.append("\n")
         return Panel(chart, title=f"[bold white]{title}[/]", border_style="blue", padding=(0, 1))
 
     @staticmethod
-    def render_toy_bot(state: str, offset: int = 0) -> RenderableType:
-        """Full High-Fidelity CLI Trader Toy."""
-        bots = {
-            "BULLISH": [
-                "    [bold green]  ^__^  [/bold green]",
-                "    [bold green] (o_O)^ [/bold green]",
-                "    [bold green]  (  )  [/bold green]",
-                "    [bold green]   WW   [/bold green]"
-            ],
-            "BEARISH": [
-                "    [bold red]  v__v  [/bold red]",
-                "    [bold red] (X_X)v [/bold red]",
-                "    [bold red]  (  )  [/bold red]",
-                "    [bold red]   MM   [/bold red]"
-            ],
-            "PANIC": [
-                "    [bold yellow]  !__!  [/bold yellow]",
-                "    [bold yellow] (O_O)? [/bold yellow]",
-                "    [bold yellow]  (  )  [/bold yellow]",
-                "    [bold yellow]   !!   [/bold yellow]"
-            ],
-            "IDLE": [
-                "    [bold cyan]  ~__~  [/bold cyan]",
-                "    [bold cyan] (o_o)  [/bold cyan]",
-                "    [bold cyan]  (  )  [/bold cyan]",
-                "    [bold cyan]   --   [/bold cyan]"
-            ]
-        }
-        bot_lines = bots.get(state, bots["IDLE"])
+    def render_debate(history: List[Any]) -> Panel:
+        """Renders an adversarial agent debate."""
+        debate_text = Text()
+        for msg in history:
+            role_color = "bold green" if "BULLISH" in msg.content else "bold red" if "BEARISH" in msg.content else "bold magenta"
+            debate_text.append(f"\n{msg.sender.upper()} [{msg.role.upper()}]:\n", style=role_color)
+            debate_text.append(f"{msg.content}\n", style="white")
+        return Panel(debate_text, title="[bold cyan]ADVERSARIAL AGENT DEBATE[/]", border_style="blue")
+
+    @staticmethod
+    def render_authority_report(report: Dict[str, Any]) -> Panel:
+        """Renders the Final Authority validation report."""
+        status_color = "bold green" if report['authorized'] else "bold red"
+        status_text = "AUTHORIZED" if report['authorized'] else "REJECTED"
+        
         content = Text()
-        content.append("\n" * offset)
-        for line in bot_lines:
-            content.append(Text.from_markup(line + "\n"))
-        return Panel(Align.center(content), title="[bold white]BETA-BOT 3000[/]", border_style="blue", subtitle=f"[dim]STATE: {state}[/]", width=40, height=15)
+        content.append(f"EXECUTION STATUS: ", style="bold white")
+        content.append(f"{status_text}\n\n", style=status_color)
+        
+        if not report['authorized']:
+            content.append("REJECTION REASONS:\n", style="bold red")
+            for reason in report['rejections']:
+                content.append(f" - {reason}\n", style="white")
+        else:
+            content.append("Institutional clearance granted. Security signature valid.\n", style="dim white")
+            
+        content.append(f"\nSIGNATURE: {report['authority_signature']}", style="dim cyan")
+        
+        return Panel(content, title="[bold blue]FINAL AUTHORITY REPORT[/bold blue]", border_style=status_color if not report['authorized'] else "blue", expand=False)
 
 class CLIAnimations:
     @staticmethod
     def pulse(message: str):
-        return console.status(f"[bold blue]⠋[/] [white]{message}...[/]", spinner="dots")
+        return console.status(f"[bold blue]-[/] [white]{message}...[/]", spinner="dots")
 
     @staticmethod
     def progress_track(title: str):
-        return Progress(SpinnerColumn(spinner_name="dots8Bit", style="bold blue"), TextColumn("[bold white]{task.description}"), BarColumn(bar_width=40, style="dim blue", complete_style="bold blue"), TaskProgressColumn(), TimeElapsedColumn(), console=console, transient=True)
+        return Progress(SpinnerColumn(spinner_name="dots", style="bold blue"), TextColumn("[bold white]{task.description}"), BarColumn(bar_width=40, style="dim blue", complete_style="bold blue"), TaskProgressColumn(), TimeElapsedColumn(), console=console, transient=True)
 
     @staticmethod
     def stream_text(text: str, delay: float = 0.01):

@@ -1,5 +1,6 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
+import random
 
 class AgentMessage(BaseModel):
     sender: str
@@ -7,85 +8,69 @@ class AgentMessage(BaseModel):
     metadata: Dict[str, Any] = {}
 
 class BaseAgent:
-    def __init__(self, name: str):
+    def __init__(self, name: str, role: str):
         self.name = name
+        self.role = role
 
-    def process(self, message: AgentMessage) -> AgentMessage:
+    def reason(self, context: str, history: List[AgentMessage]) -> AgentMessage:
         raise NotImplementedError
 
-class ResearchAgent(BaseAgent):
-    def process(self, message: AgentMessage) -> AgentMessage:
+class BullishSpecialist(BaseAgent):
+    def reason(self, context: str, history: List[AgentMessage]) -> AgentMessage:
         return AgentMessage(
-            sender=self.name, 
-            content=f"STRUCTURAL ANALYSIS: {message.content} showing liquidity expansion at H4 structural lows. Invalidation below last swing low."
+            sender=self.name,
+            content=f"BULLISH PERSPECTIVE: Accumulation phase detected on H1. Volume expansion confirms institutional support at {context} base. Targets 1.272 Fib extension."
         )
 
-class StrategyAgent(BaseAgent):
-    def process(self, message: AgentMessage) -> AgentMessage:
+class BearishSpecialist(BaseAgent):
+    def reason(self, context: str, history: List[AgentMessage]) -> AgentMessage:
+        # React to history if it exists
+        if any("BULLISH" in m.content for m in history):
+            return AgentMessage(
+                sender=self.name,
+                content=f"BEARISH REBUTTAL: Bullish thesis ignored supply zone overhead. Liquidity grab likely at {context} before reversal. Bearish divergence on RSI."
+            )
         return AgentMessage(
-            sender=self.name, 
-            content=f"STRATEGY SYNTHESIS: Executing Institutional Expansion model. Alignment found between HMM Bullish regime and M15 order flow."
+            sender=self.name,
+            content=f"BEARISH PERSPECTIVE: Market structural break detected. Selling pressure increasing at resistance."
         )
 
-class RiskAgent(BaseAgent):
-    def process(self, message: AgentMessage) -> AgentMessage:
+class RiskMonitor(BaseAgent):
+    def reason(self, context: str, history: List[AgentMessage]) -> AgentMessage:
+        bull_votes = sum(1 for m in history if "BULLISH" in m.content)
+        bear_votes = sum(1 for m in history if "BEARISH" in m.content)
+        verdict = "Bullish Conviction" if bull_votes > bear_votes else "Bearish Conviction" if bear_votes > bull_votes else "Neutral/Wait"
+        
         return AgentMessage(
-            sender=self.name, 
-            content=f"RISK APPROVAL: exposure within 0.8% threshold. Max drawdown < 2% monthly limit. Execution authorized."
-        )
-
-class AdversarialAgent(BaseAgent):
-    def process(self, message: AgentMessage) -> AgentMessage:
-        return AgentMessage(
-            sender=self.name, 
-            content=f"ADVERSARIAL CHECK: Detected low-probability cluster in high-volatility scenarios. Recommend scaling out at TP1."
-        )
-
-class SocialAgent(BaseAgent):
-    def process(self, message: AgentMessage) -> AgentMessage:
-        from beta.core.social import SocialIntelligenceEngine
-        sie = SocialIntelligenceEngine()
-        sentiment = sie.get_aggregated_sentiment(message.content)
-        return AgentMessage(
-            sender=self.name, 
-            content=f"SENTIMENT SIGNAL: {sentiment['status']} ({sentiment['score']:.2f}). Institutional bias aligning with structural analysis."
+            sender=self.name,
+            content=f"RISK ADJUDICATION: Debate analyzed. Final Verdict: {verdict}. Confidence Score: {random.uniform(0.6, 0.95):.2f}. Enforcing strict SL."
         )
 
 class AgentOrchestrator:
+    """
+    Manages the adversarial debate lifecycle between specialized intelligence agents.
+    """
     def __init__(self):
-        self.agents = {
-            "research": ResearchAgent("FX-Researcher"),
-            "strategy": StrategyAgent("Strategy-Synthesizer"),
-            "social": SocialAgent("Social-Intelligence"),
-            "risk": RiskAgent("Risk-Officer"),
-            "adversary": AdversarialAgent("Adversarial-Evaluator")
-        }
+        self.agents = [
+            BullishSpecialist("Aries-Bull", "Optimist"),
+            BearishSpecialist("Thanatos-Bear", "Pessimist"),
+            RiskMonitor("Oracle-Risk", "Adjudicator")
+        ]
 
-    def debate(self, topic: str) -> List[AgentMessage]:
-        """Simulate a multi-agent debate about a trade setup."""
-        messages = []
-        # 1. Research
-        res_msg = self.agents["research"].process(AgentMessage(sender="System", content=topic))
-        messages.append(res_msg)
+    def run_debate(self, ticker: str, turns: int = 2) -> List[AgentMessage]:
+        """
+        Executes an adversarial debate protocol.
+        """
+        history = []
+        context = ticker
         
-        # 2. Social Sentiment
-        soc_msg = self.agents["social"].process(res_msg)
-        messages.append(soc_msg)
-        
-        # 3. Strategy
-        strat_msg = self.agents["strategy"].process(soc_msg)
-        messages.append(strat_msg)
-        
-        # 4. Adversarial Evaluation
-        adv_msg = self.agents["adversary"].process(strat_msg)
-        messages.append(adv_msg)
-        
-        # 5. Final Risk Approval
-        risk_msg = self.agents["risk"].process(adv_msg)
-        messages.append(risk_msg)
-        
-        return messages
-
-    def evolve_strategy(self, strategy_id: str, performance_data: Dict) -> str:
-        """Evolve strategy parameters based on performance."""
-        return f"Evolving {strategy_id}: Adjusting z-score threshold for volatility-adjusted regimes."
+        for turn in range(turns):
+            for agent in self.agents:
+                # The RiskMonitor only speaks at the end of the debate
+                if isinstance(agent, RiskMonitor) and turn < turns - 1:
+                    continue
+                    
+                msg = agent.reason(context, history)
+                history.append(msg)
+                
+        return history

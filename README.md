@@ -1,15 +1,21 @@
 # BETA: Institutional Quantitative Intelligence OS
 
-BETA is a high-performance, autonomous multi-asset quantitative intelligence operating system designed for terminal-based financial research, risk management, and strategy execution. It bridges the gap between raw market telemetry and actionable institutional trade planning.
+[![Architecture](https://img.shields.io/badge/Architecture-Institutional--Grade-blueviolet)](#system-architecture)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
+
+> **Autonomous Multi-Asset Intelligence for Terminal-First Financial Research.**
+
+BETA is a high-performance quantitative operating system designed for terminal-based financial research, risk management, and strategy execution. It bridges the gap between raw market telemetry and actionable institutional trade planning through an adversarial multi-agent architecture.
 
 ---
 
 ## Core Platform Features
 
 ### Institutional Execution Suite
-- **RiskEngine**: Automated position sizing based on fractional capital risk (e.g., 1% risk/trade) and current account balance.
-- **Statistical Modeling**: Volatility-adjusted **ATR-based Stop Losses** and **Multi-Tier Take Profit** levels.
-- **High-Fidelity Tickets**: Synthesis of complete trade tickets including Lot Sizing, Entry Strategy (Limit/Breakout), and real-time R:R Ratio validation.
+- **RiskEngine**: Automated position sizing based on fractional capital risk and current account balance.
+- **Statistical Modeling**: Volatility-adjusted ATR-based Stop Losses and Multi-Tier Take Profit levels.
+- **High-Fidelity Tickets**: Synthesis of complete trade tickets including Lot Sizing, Entry Strategy, and real-time R:R Ratio validation.
 
 ### Advanced Quantitative Visuals
 - **Tracer Charts**: Institutional ASCII charts featuring dashed historical trails and real-time structural mapping.
@@ -18,11 +24,7 @@ BETA is a high-performance, autonomous multi-asset quantitative intelligence ope
 
 ### Social Intelligence Engine
 - **ML-Driven Sentiment**: BERT-based classification of signals from Reddit, Discord, Telegram, and Professional feeds.
-- **Institutional Weighting**: Advanced signal filtering to prioritize "Whale" activity and institutional bias over retail sentiment.
-
-### Beta-Bot 3000 (Full CLI Toy)
-- **Autonomous Simulation**: A dedicated, animated trader bot that physically climbs and falls based on simulated market noise.
-- **Emotive States**: Real-time bot reactions (BULLISH, BEARISH, PANIC) providing a creative soul to the quantitative workspace.
+- **Institutional Weighting**: Advanced signal filtering to prioritize "Whale" activity and institutional bias.
 
 ---
 
@@ -41,21 +43,55 @@ python src/beta/main.py
 | `dashboard` | Command Center | Real-time multi-pane operational workstation. |
 | `analyze` | Quant Suite | Volatility Heatmaps & Correlation Matrices. |
 | `sentiment` | Social Intel | ML-weighted institutional sentiment aggregation. |
-| `toy` | Beta-Bot 3000 | Animated autonomous trader bot simulation. |
 
 ---
 
 ## System Architecture
 
-- **Regime Engine**: HMM-based (Hidden Markov Model) market regime detection (Bullish/Bearish/Sideways).
-- **Machine Readable**: All core commands support `--json` output for automated backtesting and CI/CD integration.
-- **Agentic Orchestrator**: Multi-agent debate loops for adversarial evaluation of trade signals.
-- **Cyber-Minimalist UI**: High-density information display using `Rich` and `Typer`, optimized for keyboard-first operation.
+BETA is designed as a modular, event-driven ecosystem where intelligence agents, market engines, and risk authorities interact.
 
-## Requirements
+### High-Level Design
 
-- **Python**: 3.9+
-- **Key Dependencies**: `rich`, `typer`, `prompt_toolkit`, `pandas`, `numpy`, `scikit-learn`, `pydantic`.
+```mermaid
+graph TD
+    A[Market Data Ingestion] --> B[Regime Engine]
+    B --> C[Neural Pattern Recognition]
+    
+    subgraph "Agentic Intelligence Layer"
+        C --> D[Agent Orchestrator]
+        D --> D1[Bullish Specialist]
+        D --> D2[Bearish Specialist]
+        D --> D3[Risk Monitor]
+        D1 & D2 & D3 --> E[Adversarial Debate Protocol]
+    end
+    
+    E --> F[Final Authority Engine]
+    F --> G[Execution Ready Ticket]
+    
+    subgraph "Observability Layer"
+        H[Institutional UI]
+        I[Command Center Dashboard]
+        J[Social Intel Engine]
+    end
+    
+    G -.-> H
+    J -.-> D
+```
+
+### Core Components
+
+#### 1. The Adversarial Agent Layer
+- **Orchestrator**: Manages the lifecycle of specialized sub-agents.
+- **Debate Protocol**: A multi-turn reasoning process where agents present conflicting evidence (Bullish vs. Bearish) and a "Risk Monitor" agent adjudicates the final conviction score.
+
+#### 2. Risk & Authority Engine
+- **Fractional Risk Model**: Automatically calculates position sizing based on account equity and ATR-adjusted stop losses.
+- **Final Authority (Circuit Breaker)**: A hard-coded logic layer that rejects any trade setup exceeding institutional parameters.
+
+#### 3. Observability Suite
+- **Cyber-Minimalist CLI**: A high-density information display optimized for low-latency system management.
+- **Neural Stream**: Real-time logging of agent reasoning processes.
 
 ---
-*BETA: Precise. Professional. Autonomous.*
+
+"Standardizing the chaos of market data."

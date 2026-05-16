@@ -21,6 +21,7 @@ from prompt_toolkit.completion import WordCompleter
 
 from beta.core.engine import MarketEngine, RegimeEngine, RiskEngine
 from beta.core.social import SocialIntelligenceEngine
+from beta.core.authority import FinalAuthority, AuthorityLimits
 from beta.infrastructure.ui import InstitutionalUI, format_setup, CLIAnimations
 from beta.agents.orchestrator import AgentOrchestrator
 
@@ -31,6 +32,7 @@ regime_engine = RegimeEngine()
 risk_engine = RiskEngine(initial_capital=100000.0)
 sie = SocialIntelligenceEngine()
 orchestrator = AgentOrchestrator()
+authority = FinalAuthority()
 
 app = typer.Typer(
     name="beta",
@@ -103,23 +105,40 @@ def setup(
     asset: str = typer.Argument("EUR/USD", help="Asset to analyze."),
     risk_pct: float = typer.Option(1.0, "--risk", help="Risk percentage.")
 ):
-    """INSTITUTIONAL TRADE SETUP: Statistical modeling of entry, exit, and risk parameters."""
+    """INSTITUTIONAL TRADE SETUP: Adversarial agent debate and final authority validation."""
     print_header(f"Institutional Trade Setup: {asset}")
-    with CLIAnimations.pulse(f"Synthesizing statistical setup for {asset}"):
+    
+    # 1. Market & Regime Analysis
+    with CLIAnimations.pulse(f"Fetching structural telemetry for {asset}"):
         df = market_engine.fetch_data(asset)
         state = regime_engine.detect_regime(df)
+        time.sleep(0.5)
+        
+    # 2. Adversarial Agent Debate
+    print_header("Adversarial Intelligence Debate")
+    debate_history = orchestrator.run_debate(asset)
+    console.print(InstitutionalUI.render_debate(debate_history))
+    
+    # 3. Risk Engineering
+    with CLIAnimations.pulse("Engineering statistical risk model"):
         plan = risk_engine.generate_setup(state, risk_pct=risk_pct)
-        time.sleep(1.2)
-    prices = df['Close'].tail(15).values
-    console.print(InstitutionalUI.rendered_chart(prices, title=f"{asset} STRUCTURE EVOLUTION"))
-    risk_meta = {"volatility": state.volatility, "confidence": plan.confidence, "rr": plan.risk_reward}
-    entry_meta = {"limit": plan.entry, "breakout": plan.entry * 1.001}
-    console.print(format_setup(asset, plan.type, f"{state.trend} / {state.volatility} Vol", entry_meta, plan.sl, plan.tp, risk_meta, lot_size=plan.position_size))
+        # Update plan confidence based on debate results
+        last_msg = debate_history[-1].content
+        if "High Confidence" in last_msg: plan.confidence = 0.9
+        elif "Low Confidence" in last_msg: plan.confidence = 0.5
+        time.sleep(0.8)
 
-@app.command()
-def fx(pair: str = typer.Argument("EUR/USD")):
-    """DEEP INTELLIGENCE ANALYSIS: Alias for setup."""
-    setup(asset=pair)
+    # 4. Final Authority Validation
+    print_header("Final Authority Validation")
+    auth_report = authority.validate_setup(plan, state)
+    console.print(InstitutionalUI.render_authority_report(auth_report))
+
+    if auth_report['authorized']:
+        prices = df['Close'].tail(15).values
+        console.print(InstitutionalUI.rendered_chart(prices, title=f"{asset} STRUCTURE EVOLUTION"))
+        risk_meta = {"volatility": state.volatility, "confidence": plan.confidence, "rr": plan.risk_reward}
+        entry_meta = {"limit": plan.entry, "breakout": plan.entry * 1.001}
+        console.print(format_setup(asset, plan.type, f"{state.trend} / {state.volatility} Vol", entry_meta, plan.sl, plan.tp, risk_meta, lot_size=plan.position_size))
 
 @app.command()
 def dashboard():
@@ -142,33 +161,6 @@ def dashboard():
             time.sleep(0.2)
 
 @app.command()
-def toy():
-    """
-    BETA-BOT 3000: Full High-Fidelity CLI Trader Toy.
-    
-    Launches an animated simulation of an autonomous trader bot.
-    The bot physically climbs and falls based on simulated market noise.
-    """
-    offset = 5
-    state = "IDLE"
-    with Live(InstitutionalUI.render_toy_bot(state, offset), refresh_per_second=10, screen=True) as live:
-        for _ in range(200):
-            # Random walk logic for "climbing" and "falling"
-            move = np.random.choice([-1, 0, 1], p=[0.3, 0.3, 0.4])
-            offset = max(0, min(8, offset + move))
-            
-            # State transitions based on movement
-            if move > 0: state = "BULLISH"
-            elif move < 0: state = "BEARISH"
-            else: state = "IDLE"
-            
-            # Occasional Panic
-            if np.random.random() > 0.95: state = "PANIC"
-            
-            live.update(InstitutionalUI.render_toy_bot(state, offset))
-            time.sleep(0.15)
-
-@app.command()
 def sentiment(ticker: str = typer.Argument("BTC/USD")):
     """SOCIAL INTELLIGENCE ENGINE: ML-driven sentiment aggregation."""
     print_header(f"Social Intelligence: {ticker}")
@@ -181,11 +173,11 @@ def sentiment(ticker: str = typer.Argument("BTC/USD")):
     table.add_row("Signal Count", str(data['signal_count']))
     table.add_row("Recommendation", f"[bold]{data['status']}[/bold]")
     console.print(table)
-    CLIAnimations.stream_text(f"\n[bold magenta][!] TOP SIGNAL:[/bold magenta] {data['top_signal']}", delay=0.01)
+    CLIAnimations.stream_text(f"\n[bold magenta]TOP SIGNAL:[/bold magenta] {data['top_signal']}", delay=0.01)
 
 # --- INTERACTIVE SHELL ---
 def interactive_shell():
-    all_cmds = ["scan", "fx", "setup", "dashboard", "analyze", "sentiment", "strategy", "toy", "help", "exit", "quit", "clear"]
+    all_cmds = ["scan", "setup", "dashboard", "analyze", "sentiment", "strategy", "help", "exit", "quit", "clear"]
     completer = WordCompleter(all_cmds, ignore_case=True)
     boot_sequence()
     while True:
